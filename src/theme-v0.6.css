@@ -420,3 +420,80 @@ button:disabled { opacity: .42; }
 .phase-card{padding-bottom:16px}.phase-card .phase-head{margin-bottom:0}
 .final-report .final-metrics{margin-top:14px}.final-report .partition{padding-top:10px;padding-bottom:10px}
 @media(max-width:480px){.setup-panel{margin-top:32px}.setup-modes{grid-template-columns:1fr}.setup-screen{padding:20px}.setup-count{grid-template-columns:1fr 90px}}
+
+/* Pantallas de trabajo: construir, recorrer y demostrar. */
+.stage-container{max-width:1600px;margin:auto;padding:28px 36px 56px;color:var(--fl-text)}
+.stage-nav{display:flex;gap:24px;font-size:14px;color:var(--fl-muted)}
+.stage-nav [aria-current]{color:var(--fl-accent);font-weight:700}
+.stage-version{color:var(--fl-muted);font-size:13px}
+.stage-back{display:inline-flex;gap:8px;align-items:center;background:transparent;border:0;color:var(--fl-muted);min-height:44px;padding:0 10px 0 0;margin-bottom:24px}
+.stage-back:hover{color:var(--fl-text)}
+.stage-title{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:30px}
+.stage-title h1{font:600 clamp(30px,3.5vw,46px)/1.08 'Barlow',sans-serif;letter-spacing:-.025em;margin:0 0 12px}
+.stage-title p,.stage-hint{font-size:14px;line-height:1.55;color:var(--fl-muted);margin:0 0 16px}
+.stage-container h2{font-size:20px;font-weight:600;margin:0 0 20px}
+.stage-container h3{font-size:16px;font-weight:600;margin:0 0 12px}
+.stage-container .setup-panel{margin-top:8px}
+.construction-layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:28px;align-items:start}
+.stage-tools{padding:24px;background:var(--fl-panel);border:1px solid var(--fl-line);border-radius:8px}
+.stage-tools .form-group{margin-top:24px}
+.stage-tools .terminal-chip{min-width:40px;min-height:40px;font-size:14px}
+.stage-tools label{font-size:14px}
+.stage-tools .studio-button{min-height:46px}
+.virtual-explainer{padding:22px 0;border-top:1px solid var(--fl-line);margin-top:24px}
+.virtual-explainer p{font-size:14px;line-height:1.55;margin:8px 0;color:var(--fl-muted)}
+.virtual-explainer small{display:block;font-size:13px;line-height:1.6;color:var(--fl-muted);margin-top:12px}
+.source-text{color:#65d9b8}.sink-text{color:#f7ba79}.reverse-text{color:#df9bfa}
+.connection-form{border-top:1px solid var(--fl-line);padding:24px 0 0}
+.connection-form label{display:block;margin:18px 0}
+.connection-form input{width:100%;margin-top:8px;min-height:44px;padding:10px;background:var(--fl-panel);color:var(--fl-text);border:1px solid var(--fl-line)}
+.construction-graph,.simulation-graph{min-width:0;display:flex;flex-direction:column;gap:18px}
+.staged-canvas{height:620px;min-height:480px;border:1px solid var(--fl-line);border-radius:8px;overflow:hidden}
+.virtual-node.react-flow__node{width:98px!important;height:70px!important;border-style:dashed!important;border-radius:8px!important}
+.virtual-node .node-inner small{font-size:11px;color:inherit}
+.stage-container summary{cursor:pointer;min-height:50px;padding:16px;color:var(--fl-text);font-size:15px}
+.stage-container summary span{color:var(--fl-muted);margin-left:14px;font-size:13px}
+.stage-container .edge-editor{margin:0}
+.stage-container .edge-editor-row{grid-template-columns:1fr 110px 44px}
+.stage-container .edge-editor-row>input{width:100%;min-height:40px;background:var(--fl-panel);color:var(--fl-text);border:1px solid var(--fl-line);padding:8px}
+.stage-container .edge-editor-row>button,.history-head>button{min-width:44px;min-height:44px;background:transparent;color:var(--fl-muted);border:0;cursor:pointer}
+.simulation-layout{display:grid;grid-template-columns:250px minmax(0,1fr) 300px;gap:22px;align-items:start}
+.stage-history,.stage-simulation{min-width:0;border:1px solid var(--fl-line);border-radius:8px;padding:20px;background:var(--fl-panel)}
+.stage-history .history-head{padding:0;border:0;margin-bottom:12px}.stage-history .history-head h2{margin:0}
+.stage-history .history-list{padding:0;max-height:540px;overflow:auto}
+.stage-history .history-entry{min-height:64px}
+.stage-history .history-description strong{font-size:13px;white-space:normal;overflow-wrap:anywhere}
+.stage-history .history-description small{font-size:12px}
+.stage-simulation .flow-feature{margin:0 0 24px}
+.stage-simulation .phase-card{margin:24px 0}
+.stage-simulation .stage-path{color:var(--fl-text);font-size:16px;overflow-wrap:anywhere;line-height:1.5}
+.stage-simulation .playback-buttons{grid-template-columns:repeat(4,1fr)}
+.stage-simulation .playback-buttons button{min-height:44px}
+.stage-next{margin-top:18px;min-height:50px;font-size:15px}
+.result-seal{color:var(--fl-accent);flex-shrink:0}
+.result-overview{display:flex;align-items:center;flex-wrap:wrap;gap:24px 56px;border-top:1px solid var(--fl-line);border-bottom:1px solid var(--fl-line);padding:28px 0;margin-bottom:40px}
+.result-overview>div{display:flex;flex-direction:column;gap:10px}
+.result-overview span{font-size:13px;color:var(--fl-muted)}
+.result-overview strong{font-size:64px;line-height:1;font-weight:600;color:var(--fl-accent);font-variant-numeric:tabular-nums}
+.result-overview .result-equals{font-size:34px}
+.result-overview p{margin-left:auto;color:var(--fl-muted);font-size:14px}
+.result-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:32px;align-items:start}
+.result-layout>section{min-width:0}
+.result-partitions{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+.result-partitions>div{padding:18px;background:var(--fl-panel);border:1px solid var(--fl-line)}
+.result-partitions p{font-size:16px;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.result-table{width:100%;border-collapse:collapse;text-align:left;font-size:15px;font-variant-numeric:tabular-nums}
+.result-table th{color:var(--fl-muted);font-size:13px;font-weight:500}
+.result-table td,.result-table th{padding:14px 10px;border-bottom:1px solid var(--fl-line)}
+.result-table tfoot td{color:var(--fl-accent);font-weight:700}
+.cut-details h2:not(:first-child){margin-top:34px}
+.cut-details .stage-hint{margin-top:18px}
+.result-table-scroll{max-height:450px;overflow:auto}
+.result-paths{margin-top:40px}.result-paths .stage-history .history-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-height:none}
+.result-paths .stage-history h2{display:none}
+.stage-error{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;max-width:calc(100% - 32px);background:#321b22;color:#ffe0e6;padding:16px}
+.stage-app ::selection{background:#daf77f;color:#111718}
+.stage-app{scrollbar-color:#526155 #111718}
+@media(max-width:1250px){.simulation-layout{grid-template-columns:200px minmax(0,1fr) 260px;gap:14px}.stage-container{padding:22px}.stage-nav{gap:14px;font-size:13px}.staged-canvas{height:560px}}
+@media(max-width:1000px){.simulation-layout{grid-template-columns:minmax(0,1fr) 290px}.simulation-graph{grid-column:1;grid-row:1}.stage-simulation{grid-column:2;grid-row:1}.simulation-layout>.stage-history{grid-column:1 / -1;grid-row:2}.stage-history .history-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}.construction-layout{grid-template-columns:280px minmax(0,1fr);gap:18px}.result-layout{grid-template-columns:1fr}.stage-nav{gap:10px;font-size:12px}.stage-version{display:none}}
+@media(max-width:700px){.stage-container{padding:18px 16px 40px}.lab-header{flex-wrap:wrap;height:auto;gap:16px;padding:16px}.stage-nav{width:100%;justify-content:space-between;font-size:12px;gap:8px;order:2}.construction-layout,.simulation-layout{display:flex;flex-direction:column}.stage-tools,.construction-graph,.stage-history,.simulation-graph,.stage-simulation{width:100%}.simulation-graph{order:0}.stage-simulation{order:1}.stage-history{order:2}.staged-canvas{height:480px;min-height:440px}.stage-title{margin-bottom:20px}.stage-title h1{font-size:32px}.stage-title p{font-size:14px}.result-overview{gap:20px;padding:24px 0}.result-overview strong{font-size:48px}.result-overview p{margin:0;width:100%;line-height:1.5}.result-overview span{font-size:11px}.result-paths .stage-history .history-list{grid-template-columns:1fr}.stage-history .history-list{grid-template-columns:1fr}.result-partitions{gap:12px}.setup-panel{gap:22px}.setup-modes{grid-template-columns:1fr}.stage-container .canvas-overlay-top{gap:8px}.stage-container .canvas-overlay-top>span{font-size:11px}.stage-container .canvas-overlay-bottom{font-size:11px}.stage-container .setup-panel h1{font-size:38px}}

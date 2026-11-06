@@ -1,16 +1,17 @@
-# FlowLab v0.8 — Laboratorio de flujo máximo
+# FlowLab v0.9 — Laboratorio de flujo máximo
 
 Simulador web de Ford–Fulkerson con búsqueda BFS (Edmonds–Karp), React y TypeScript.
 
-## Uso
+## Recorrido
 
-1. Entra al laboratorio desde la portada.
-2. Indica la cantidad exacta de nodos (7–16) y elige Manual o Automática.
-3. En Manual, la red comienza sin aristas: conecta vértices y asigna capacidades. En Automática, la red ya está generada y las conexiones se consultan sin editar.
-4. Selecciona fuentes y sumideros por clic; recorre las fases y el historial hasta el flujo máximo y el corte mínimo.
-5. Usa Volver a configurar para cambiar cantidad o modo. Crear red inicia una red nueva.
+1. **Configurar:** cantidad exacta de nodos (7–16) y creación manual o automática.
+2. **Construir:** grafo editable en manual, selección de fuentes y sumideros en ambos modos, superfuente S* y supersumidero T* visibles al elegir varias terminales. Matriz de capacidades plegada por defecto, solo en esta pantalla. Los ciclos y otras redes inválidas bloquean el inicio.
+3. **Simular:** historial a la izquierda, grafo al centro y controles a la derecha en escritorio. El botón verde avanza una etapa. También se puede reproducir automáticamente y retroceder.
+4. **Resultado:** al terminar, el botón verde cambia a Ver resultado final. Muestra el flujo máximo, corte mínimo, conjuntos S/T, capacidades de corte, flujo por arista y caminos utilizados.
 
-El motor conserva los arcos inversos, validación de ciclos, múltiples terminales y corte mínimo. Se retiraron de la interfaz importar/exportar JSON, guardar sesión, cargar el ejemplo inverso y restablecer el ejemplo. Se conserva la descarga CSV del historial. La vista residual completa queda fuera de este cambio.
+Cada pantalla permite volver a la anterior. Volver no borra la red ni la simulación; editar la red invalida los estados previos. Crear una red nueva inicia un análisis nuevo.
+
+Los nodos ficticios no cuentan entre los n originales. Sus arcos son discontinuos y usan la misma capacidad del motor: suma de capacidades originales + 1. El flujo en esos arcos se obtiene del balance de cada terminal. Las aristas inversas y su rastro histórico continúan disponibles; se retiró la visualización del árbol/etiquetas BFS, no la búsqueda BFS del motor.
 
 ## Desarrollo
 
@@ -23,10 +24,10 @@ npm run test
 npm run build
 ```
 
-Vercel compila con `npm run build` y publica `dist`. La rama main del repositorio web activa el despliegue automático. El repositorio original de Python no se modifica.
+Vercel compila con `npm run build` y publica `dist`. La rama main del repositorio web activa el despliegue. El repositorio Python original permanece independiente.
 
-## Comprobaciones de v0.8
+## Verificación
 
-- 11 tests: incluye generación manual/automática para todo el rango 7–16 y rechazo de cantidades inválidas, además del motor y 30 redes contrastadas con cortes enumerados.
-- Navegador local: manual de 8 nodos, creación A→H y flujo 5; automática de 16 nodos, editor ausente y simulación final; sin errores de consola en la consulta realizada.
-- Logs anteriores de v0.7 se conservan con su contexto histórico. El informe académico y el PPT no forman parte de esta actualización.
+11 tests del motor y la generación (incluyen 30 DAG contrastados con todos sus cortes). Navegador: automático multifuente/multisumidero, nodos ficticios visibles, fases, historial, resultado, navegación de regreso, manual con ciclo bloqueado y corregido, reproducción automática y disposición móvil sin desbordamiento horizontal. Se aplica revisión Impeccable del código y revisión visual; no equivale a una certificación WCAG completa ni a prueba de gestos en dispositivo físico.
+
+Los logs de v0.7 y los documentos de esa versión se conservan como antecedentes. Esta actualización no prepara la entrega académica ni cambia el programa Python.
