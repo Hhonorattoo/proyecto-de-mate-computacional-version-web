@@ -1,0 +1,13 @@
+
+> ford-fulkerson-web@0.7.0 test
+> vitest run
+
+
+ RUN  v4.1.12 /home/diegohonoratto/.codex/.chatgpt-projects/g-p-6ae8db6ea00c819185e52f9963cad8a8/work/v0.7/ford-fulkerson-web
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  20:17:13
+   Duration  3.66s (transform 878ms, setup 0ms, import 1.16s, tests 533ms, environment 1ms)
+
