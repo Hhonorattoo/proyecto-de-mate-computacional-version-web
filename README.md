@@ -1,4 +1,4 @@
-# Flow Fulkerson v0.9.1 — Laboratorio de flujo máximo
+# Flow Fulkerson v0.9.2 — Laboratorio de flujo máximo
 
 Simulador web de Ford–Fulkerson con búsqueda BFS (Edmonds–Karp), React y TypeScript.
 
@@ -32,10 +32,14 @@ Vercel compila con `npm run build` y publica `dist`. La rama main del repositori
 
 Los logs de v0.7 y los documentos de esa versión se conservan como antecedentes. Esta actualización no prepara la entrega académica ni cambia el programa Python.
 
-## Ajustes v0.9.1
+## Ajustes v0.9.2
 
 Inicio de simulación y validación junto al encabezado de arquitectura. S* y T* se pueden arrastrar durante la construcción. Descarga visible «Descargar CSV» tanto en historial como en resultado; tooltip y nombre accesible explican el dataset.
 
 ## Identidad
 
-Flow Fulkerson: marca con DynaPuff SemiBold autoalojada (licencia SIL Open Font License en public/fonts). Publicado en https://flow-fulkerson.vercel.app/. La variante azul/celeste/morada permanece como prueba local separada, sin incorporarse a producción.
+Flow Fulkerson: marca con DynaPuff SemiBold autoalojada (licencia SIL Open Font License en public/fonts). Publicado en https://flow-fulkerson.vercel.app/. La paleta azul/celeste/morada está aprobada e incorporada a producción; el muestrario de fuentes permanece local para comparar opciones.
+
+## Paleta acuática
+
+Lienzo, minimapa, controles y etiquetas con fondos azul noche; celeste para caminos y acciones, morado para regresos. Verde y naranja conservan su significado de fuente y sumidero. Tipografía DynaPuff actual hasta elegir una alternativa del muestrario.

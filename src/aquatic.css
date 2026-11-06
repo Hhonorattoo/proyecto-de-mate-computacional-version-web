@@ -1,0 +1,38 @@
+/* Identidad acuática aprobada. */
+.welcome-screen{background:#070e1b}
+.welcome-screen::after{content:'';pointer-events:none;position:absolute;width:100%;height:210px;bottom:0;left:0;opacity:.23;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 220' fill='none'%3E%3Cpath d='M-40 80C180 -40 350 200 620 90S1080 0 1480 95M-40 115C180 -5 350 235 620 125S1080 35 1480 130M-40 150C180 30 350 270 620 160S1080 70 1480 165' stroke='%237acbfa' stroke-width='1.4'/%3E%3Cpath d='M-40 170C180 50 350 290 620 180S1080 90 1480 185' stroke='%23bca2ff' stroke-width='1.4'/%3E%3C/svg%3E");background-size:cover;z-index:0}
+.welcome-screen>*{position:relative;z-index:1}
+.schematic-wrap{border-color:#2e4464;background:#0b182a;box-shadow:none;border-radius:18px 5px 18px 5px}
+.schematic-heading,.schematic-footer{color:#b4cce0}.schematic-guides path,.schematic-guides circle{stroke:#6685b9}
+.schematic-node-halo{fill:#11273b;stroke:#55799e}.schematic-node-core{fill:#13283e;stroke:#8badc9}
+.schematic-path-annotations rect{fill:#19354c;stroke:#6591b0}
+.welcome-main h1{color:#eaf5ff}.welcome-main h1>span:first-child{color:#80ddff}
+.welcome-nav-enter{background:#102237}.welcome-nav-enter:hover{background:#1b3650}.welcome-cta:hover{background:#b1edff;border-color:#b1edff}
+.setup-modes label.chosen{border-color:#80ddff;background:#15324b}.history-selected{background:#16374d!important;border-color:#6598b8!important}
+.stage-app .flow-feature{background:#123148;border-color:#34566c}.phase-card{background:#10243b;border-color:#294662}
+.stage-app .studio-button-teal{background:#80ddff;border-color:#80ddff;color:#072137}.stage-app .studio-button-dark{background:#17324b;border-color:#34546c;color:#eaf5ff}
+.react-flow__edge.path-edge path{stroke:#80ddff!important}.react-flow__node.partition-s{border-color:#80ddff!important}
+.stage-app .react-flow__node:not(.source-node):not(.sink-node){background:#15263d;color:#eaf5ff}
+.stage-nav [aria-current]{color:#80ddff}.result-seal{color:#a4b5ff}
+.welcome-scroll,.welcome-bottom{background:transparent}.welcome-bottom>div{border-color:#293c57}::selection{background:#80ddff;color:#072137}
+
+:root{--fl-canvas:#0b1628;--fl-grid:#27415c}
+.lab-app,.stage-app{background:var(--fl-bg)}
+.lab-header{background:var(--fl-panel)}
+.graph-canvas,.graph-canvas .react-flow{background:var(--fl-canvas);background-image:none}
+.graph-canvas .react-flow__background{background:var(--fl-canvas)}
+.react-flow__edge-textbg{fill:#152b43}.react-flow__edge-text{fill:#eaf5ff}
+.react-flow__controls{background:#11253b!important;border-color:#35526d!important}
+.react-flow__controls-button{background:#142d45!important;border-color:#35526d!important;color:#eaf5ff!important;fill:#eaf5ff!important}
+.react-flow__controls-button:hover{background:#23445f!important}
+.react-flow__minimap{background:#102139!important;border-color:#35526d!important}
+.canvas-overlay-top,.canvas-overlay-bottom{background:#11263bed;color:#d8eaf7;border-color:#35526d}
+.react-flow__handle{background:var(--fl-accent);border-color:#294b69}
+.terminal-chip{background:#15283c;border-color:#35506a;color:#d4e5f4}
+.form-group input,.form-group select{background:#101f32;border-color:#35506a;color:#eaf5ff}
+.detail-stats>div,.playback-buttons button,.history-entry,.edge-preview{background:#132438;border-color:#304b65;color:#eaf5ff}
+.history-index{background:#203a54;color:#b7eaff}
+.studio-button-quiet{background:#142d43;color:#d8eaf7;border-color:#35526d}
+.welcome-live-dot{box-shadow:none}.welcome-logo-icon,.welcome-cta{color:#072137}
+.schematic-path-annotations rect.reverse-label-bg{fill:#281e3d;stroke:#a58bc9}
+.schematic-path-annotations text.reverse-label-text{fill:#df9bfa}

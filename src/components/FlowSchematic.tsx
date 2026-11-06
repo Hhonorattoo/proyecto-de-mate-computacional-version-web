@@ -34,7 +34,7 @@ export function FlowSchematic() {
           <path d="M0 0L7 3.5L0 7" fill="none" stroke="#83928a" strokeWidth="1.2"/>
         </marker>
         <marker id="fl-arrow-active" markerWidth="8" markerHeight="8" refX="6.5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
-          <path d="M0 0L7 3.5L0 7" fill="none" stroke="#d8fb6c" strokeWidth="1.5"/>
+          <path d="M0 0L7 3.5L0 7" fill="none" stroke="#80ddff" strokeWidth="1.5"/>
         </marker>
         <marker id="fl-arrow-back" markerWidth="8" markerHeight="8" refX="6.5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
           <path d="M0 0L7 3.5L0 7" fill="none" stroke="#df9bfa" strokeWidth="1.6"/>
@@ -43,7 +43,7 @@ export function FlowSchematic() {
       <rect x="0" y="0" width="790" height="526" fill="url(#fl-grid)"/>
       <g className="schematic-guides"><path d="M32 260H745M393 55V470" /><circle cx="394" cy="259" r="208"/><circle cx="394" cy="259" r="136"/></g>
       {trails.map((d,i) => <path key={i} d={d} fill="none" stroke="#53635e" strokeWidth="1.6" opacity=".5" markerEnd="url(#fl-arrow)"/>) }
-      {active.map((d,i) => <motion.path key={`active-${i}`} d={d} fill="none" stroke="#d8fb6c" strokeWidth="2.5" markerEnd="url(#fl-arrow-active)" strokeLinecap="round" initial={reduced ? false : {pathLength:0,opacity:.2}} animate={{pathLength:1,opacity:1}} transition={{duration:1.2,delay:.45+i*.18,ease:'easeOut'}} />)}
+      {active.map((d,i) => <motion.path key={`active-${i}`} d={d} fill="none" stroke="#80ddff" strokeWidth="2.5" markerEnd="url(#fl-arrow-active)" strokeLinecap="round" initial={reduced ? false : {pathLength:0,opacity:.2}} animate={{pathLength:1,opacity:1}} transition={{duration:1.2,delay:.45+i*.18,ease:'easeOut'}} />)}
       <path d="M392 398 C338 325 337 245 395 187" fill="none" stroke="#df9bfa" strokeWidth="2.6" strokeDasharray="8 9" markerEnd="url(#fl-arrow-back)" className="schematic-reverse"/>
       <g className="schematic-path-annotations">
         <rect x="267" y="118" width="61" height="26" rx="5"/><text x="297" y="135" textAnchor="middle">+ 08</text>

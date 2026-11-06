@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import '@xyflow/react/dist/style.css'
 import './styles.css'
 import './theme-v0.6.css'
+import './aquatic.css'
 import App from './App'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
