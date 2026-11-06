@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Background, BaseEdge, Controls, EdgeLabelRenderer, MarkerType, MiniMap, ReactFlow,
   useNodesState, type Connection, type Edge, type EdgeProps, type Node,
@@ -6,18 +6,16 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import {
   ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronDown,
-  ChevronRight, CircleHelp, Clock3, Download, FileJson, GitBranch, Layers3, Menu,
-  Network, Pause, Play, Plus, RotateCcw, ShieldCheck, SkipBack, SkipForward, Sparkles,
-  Trash2, Upload, X, Zap,
+  ChevronRight, CircleHelp, Clock3, Download, GitBranch, Layers3, Menu,
+  Network, Pause, Play, Plus, ShieldCheck, SkipBack, SkipForward,
+  Trash2, X, Zap,
 } from 'lucide-react'
 import { FlowMark } from './components/FlowMark'
 import { FlowSchematic } from './components/FlowSchematic'
 import { buildSimulation, validateGraph } from './engine/fordFulkerson'
-import { exampleGraph } from './data/example'
-import { reverseResidualExample } from './data/reverseResidualExample'
+import { createGraph, type CreationMode } from './engine/createGraph'
 import type { BfsLabel, GraphEdge, GraphInput, SimulationStep } from './engine/types'
 
-const STORAGE_KEY = 'flowlab:session:v0.5' // misma clave para preservar sesiones guardadas de v0.5
 const phases: Record<SimulationStep['phase'], { name: string; short: string; number: string }> = {
   BUSQUEDA_BFS: { name: 'Etiquetado BFS', short: 'Búsqueda', number: '01' },
   CAMINO_ENCONTRADO: { name: 'Camino encontrado', short: 'Camino', number: '02' },
@@ -107,35 +105,6 @@ function makeEdges(edges: GraphEdge[], step?: SimulationStep, selectedEdge?: str
   return [...original, ...reverseResiduals]
 }
 
-function isGraphInput(value: unknown): value is GraphInput {
-  if (!value || typeof value !== 'object') return false
-  const graph = value as Partial<GraphInput>
-  return Array.isArray(graph.nodes) && Array.isArray(graph.edges) &&
-    Array.isArray(graph.sources) && Array.isArray(graph.sinks) &&
-    graph.nodes.every(n => n && typeof n.id === 'string' && typeof n.label === 'string') &&
-    graph.edges.every(e => e && typeof e.id === 'string' && typeof e.source === 'string' && typeof e.target === 'string' && typeof e.capacity === 'number') &&
-    graph.sources.every(s => typeof s === 'string') && graph.sinks.every(s => typeof s === 'string') &&
-    graph.nodes.length >= 7 && graph.nodes.length <= 16 &&
-    new Set(graph.nodes.map(n => n.id)).size === graph.nodes.length &&
-    new Set(graph.edges.map(e => e.id)).size === graph.edges.length
-}
-
-type StoredSession = { graph: GraphInput; stepIndex: number }
-function readSavedSession(): StoredSession | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const saved: unknown = JSON.parse(raw)
-    if (!saved || typeof saved !== 'object') return null
-    const candidate = saved as Partial<StoredSession>
-    if (!isGraphInput(candidate.graph)) return null
-    return { graph: candidate.graph, stepIndex: typeof candidate.stepIndex === 'number' && Number.isFinite(candidate.stepIndex) ? candidate.stepIndex : -1 }
-  } catch { return null }
-}
-const initialSession = readSavedSession()
-const restoredSteps = initialSession && initialSession.stepIndex >= 0 && !validateGraph(initialSession.graph).length ? buildSimulation(initialSession.graph) : []
-const restoredIndex = restoredSteps.length ? Math.max(0, Math.min(restoredSteps.length - 1, Math.floor(initialSession!.stepIndex))) : -1
-
 function downloadText(filename: string, text: string, mime = 'application/json') {
   const url = URL.createObjectURL(new Blob([text], { type: `${mime};charset=utf-8` }))
   const link = document.createElement('a')
@@ -192,14 +161,16 @@ function TerminalChips({
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<'inicio' | 'laboratorio'>(() => window.location.hash.startsWith('#/laboratorio') ? 'laboratorio' : 'inicio')
-  const [graph, setGraph] = useState<GraphInput>(initialSession?.graph ?? exampleGraph)
-  const [steps, setSteps] = useState<SimulationStep[]>(restoredSteps)
-  const [stepIndex, setStepIndex] = useState(restoredIndex)
+  const [screen, setScreen] = useState<'inicio' | 'configuracion' | 'laboratorio'>(window.location.hash === '#/inicio' || !window.location.hash ? 'inicio' : 'configuracion')
+  const [mode, setMode] = useState<CreationMode>('manual')
+  const [count, setCount] = useState('7')
+  const manual = mode === 'manual'
+  const [graph, setGraph] = useState<GraphInput>(createGraph(7, 'manual'))
+  const [steps, setSteps] = useState<SimulationStep[]>([])
+  const [stepIndex, setStepIndex] = useState(-1)
   const [sourceDraft, setSourceDraft] = useState('A')
   const [targetDraft, setTargetDraft] = useState('B')
   const [capacityDraft, setCapacityDraft] = useState('5')
-  const [nodeDraft, setNodeDraft] = useState('')
   const [selectedEdge, setSelectedEdge] = useState<string | undefined>()
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -208,7 +179,6 @@ export default function App() {
   const [showAllEdges, setShowAllEdges] = useState(false)
   const [showMatrix, setShowMatrix] = useState(false)
   const [mobileToolsOpen, setMobileToolsOpen] = useState(true)
-  const importRef = useRef<HTMLInputElement>(null)
   const reducedMotion = useReducedMotion()
   const current = steps[stepIndex]
   const validation = useMemo(() => validateGraph(graph), [graph])
@@ -218,11 +188,10 @@ export default function App() {
   const maxFlow = steps.at(-1)?.totalFlow ?? 0
 
   useEffect(() => {
-    const update = () => setScreen(window.location.hash.startsWith('#/laboratorio') ? 'laboratorio' : 'inicio')
+    const update = () => setScreen(window.location.hash === '#/laboratorio' ? 'laboratorio' : window.location.hash === '#/configuracion' ? 'configuracion' : 'inicio')
     window.addEventListener('hashchange', update)
     return () => window.removeEventListener('hashchange', update)
   }, [])
-  useEffect(() => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ graph, stepIndex })) } catch { /* storage can be disabled */ } }, [graph, stepIndex])
   useEffect(() => {
     const fresh = makeNodes(graph, current)
     setNodes(previous => {
@@ -237,8 +206,8 @@ export default function App() {
     return () => window.clearTimeout(timeout)
   }, [playing, stepIndex, steps, reducedMotion])
 
-  const goTo = (next: 'inicio' | 'laboratorio') => {
-    window.location.hash = next === 'laboratorio' ? '/laboratorio' : '/inicio'
+  const goTo = (next: 'inicio' | 'configuracion' | 'laboratorio') => {
+    window.location.hash = `/${next}`
     setScreen(next)
     window.scrollTo({ top: 0, behavior: reducedMotion ? 'instant' : 'smooth' })
   }
@@ -246,21 +215,11 @@ export default function App() {
     setGraph(next); setSteps([]); setStepIndex(-1); setPlaying(false); setError(''); setNotice(''); setSelectedEdge(undefined)
   }
   const onConnect = useCallback((connection: Connection) => {
-    if (!connection.source || !connection.target) return
+    if (!manual || !connection.source || !connection.target) return
     const id = `e-${Date.now()}-${Math.floor(Math.random() * 10000)}`
     setGraph(g => ({ ...g, edges: [...g.edges, { id, source: connection.source!, target: connection.target!, capacity: 5 }] }))
     setSteps([]); setStepIndex(-1); setPlaying(false); setError('')
-  }, [])
-  function addNode() {
-    const id = nodeDraft.trim().toUpperCase()
-    if (!id || graph.nodes.some(n => n.id === id) || !/^[A-Z0-9]{1,3}$/.test(id)) { setError('Usa una etiqueta única de 1 a 3 letras o números.'); return }
-    if (graph.nodes.length >= 16) { setError('El máximo es 16 nodos.'); return }
-    updateGraph({ ...graph, nodes: [...graph.nodes, { id, label: id }] }); setNodeDraft('')
-  }
-  function deleteNode(id: string) {
-    if (graph.nodes.length <= 7) { setError('La red debe conservar al menos 7 nodos.'); return }
-    updateGraph({ ...graph, nodes: graph.nodes.filter(n => n.id !== id), edges: graph.edges.filter(e => e.source !== id && e.target !== id), sources: graph.sources.filter(n => n !== id), sinks: graph.sinks.filter(n => n !== id) })
-  }
+  }, [manual])
   function addEdge() {
     const capacity = Number(capacityDraft)
     const realSource = graph.nodes.some(n => n.id === sourceDraft) ? sourceDraft : graph.nodes[0]?.id
@@ -276,14 +235,13 @@ export default function App() {
     if (!edge || edge.capacity === capacity) return
     updateGraph({ ...graph, edges: graph.edges.map(e => e.id === id ? { ...e, capacity } : e) })
   }
-  function randomize() {
-    const ids = graph.nodes.map(n => n.id)
-    const edges: GraphEdge[] = []
-    for (let i = 0; i < ids.length - 1; i++) edges.push({ id: `r${i}`, source: ids[i], target: ids[i + 1], capacity: 3 + Math.floor(Math.random() * 12) })
-    for (let i = 0; i < ids.length; i++) for (let j = i + 2; j < ids.length; j++) if (Math.random() < .22) {
-      edges.push({ id: `r${i}-${j}`, source: ids[i], target: ids[j], capacity: 2 + Math.floor(Math.random() * 15) })
-    }
-    updateGraph({ ...graph, edges, sources: [ids[0]], sinks: [ids[ids.length - 1]] })
+  function configure() {
+    try {
+      const next = createGraph(Number(count), mode)
+      updateGraph(next)
+      setNodes(makeNodes(next)); setShowAllEdges(false)
+      goTo('laboratorio')
+    } catch { setError('Elige un número entero entre 7 y 16.'); }
   }
   function start() {
     if (validation.length) { setError(validation.join(' ')); return }
@@ -291,10 +249,6 @@ export default function App() {
     catch (e) { setError(e instanceof Error ? e.message : 'No se pudo iniciar la simulación.') }
   }
   const goStep = (next: number) => { setPlaying(false); setStepIndex(Math.max(0, Math.min(steps.length - 1, next))) }
-  function exportSession() {
-    downloadText('FlowLab-sesion.json', JSON.stringify({ version: '0.7', graph, stepIndex, history: steps, savedAt: new Date().toISOString() }, null, 2))
-    setNotice('Sesión JSON exportada con grafo, historial y estado actual.')
-  }
   function exportCSV() {
     if (!steps.length) return
     const rows = [['Iteracion', 'Etapa', 'Flujo acumulado', 'Cuello de botella', 'Camino', 'Descripcion'], ...steps.map(s => [
@@ -303,35 +257,29 @@ export default function App() {
     const csv = rows.map(row => row.map(cell => `"${cell.replaceAll('"', '""')}"`).join(',')).join('\r\n')
     downloadText('FlowLab-historial.csv', '\ufeff' + csv, 'text/csv')
   }
-  async function importSession(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    try {
-      if (file.size > 2_000_000) throw new Error('Archivo demasiado grande (máximo 2 MB).')
-      const parsed: unknown = JSON.parse(await file.text())
-      const session = parsed && typeof parsed === 'object' && 'graph' in parsed ? parsed as { graph: unknown; stepIndex?: unknown } : { graph: parsed, stepIndex: -1 }
-      if (!isGraphInput(session.graph)) throw new Error('El archivo no tiene una estructura de grafo válida.')
-      const issues = validateGraph(session.graph)
-      if (issues.length) throw new Error(issues.join(' '))
-      const restored = typeof session.stepIndex === 'number' && session.stepIndex >= 0 ? buildSimulation(session.graph) : []
-      setGraph(session.graph)
-      setSteps(restored)
-      setStepIndex(restored.length ? Math.min(restored.length - 1, Math.floor(session.stepIndex as number)) : -1)
-      setPlaying(false); setError(''); setNotice('Red y estado de simulación importados correctamente.')
-    } catch (error) { setError(error instanceof Error ? error.message : 'No se pudo importar el archivo.') }
-    finally { event.target.value = '' }
-  }
-
   const isFinished = !!current?.finished
   const flowSummary = current?.phase === 'FINAL' ? current.totalFlow : maxFlow
 
   return <AnimatePresence mode="wait">
-    {screen === 'inicio' ? <motion.div key="welcome" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : .25 }}><Welcome enter={() => goTo('laboratorio')}/></motion.div>
-      : <motion.div key="lab" className="lab-app" initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : .3 }}>
+    {screen === 'inicio' ? <motion.div key="welcome" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : .25 }}><Welcome enter={() => { setError(''); goTo('configuracion') }}/></motion.div>
+      : screen === 'configuracion' ? <motion.main key="setup" className="setup-screen" initial={{opacity:0}} animate={{opacity:1}}>
+        <button className="header-text-button" onClick={() => goTo('inicio')}><ArrowLeft size={16}/> Volver al inicio</button>
+        <form className="setup-panel" onSubmit={e => {e.preventDefault(); configure()}}>
+          <FlowMark size={34}/><span className="panel-index">01 / PREPARAR LA RED</span>
+          <h1>Cada red empieza<br/>con una decisión.</h1>
+          <label className="setup-count">Cantidad de nodos <span>De 7 a 16 vértices</span><input aria-label="Cantidad de nodos" type="number" min="7" max="16" step="1" required value={count} onChange={e => setCount(e.target.value)}/></label>
+          <fieldset className="setup-modes"><legend>Cómo quieres construirla</legend>
+            <label className={manual ? 'chosen' : ''}><input type="radio" name="mode" value="manual" checked={manual} onChange={() => setMode('manual')}/><strong>Manual</strong><span>Tú defines las conexiones y sus capacidades.</span></label>
+            <label className={!manual ? 'chosen' : ''}><input type="radio" name="mode" value="aleatoria" checked={!manual} onChange={() => setMode('aleatoria')}/><strong>Automática</strong><span>Una red aleatoria, lista para explorar.</span></label>
+          </fieldset>
+          {error && <p role="alert">{error}</p>}
+          <button className="studio-button studio-button-teal full" type="submit">Crear red <ArrowRight size={18}/></button>
+        </form>
+      </motion.main> : <motion.div key="lab" className="lab-app" initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : .3 }}>
         <header className="lab-header">
           <button className="lab-brand" onClick={() => goTo('inicio')} aria-label="Volver a portada"><span className="brand-symbol"><FlowMark size={22}/></span><span>FLOW<b>LAB</b><small>LABORATORIO DE GRAFOS</small></span></button>
-          <div className="lab-header-center"><span className="header-dot"/> FORD–FULKERSON <span className="header-separator"/> v0.7</div>
-          <div className="lab-header-actions"><button className="header-text-button" onClick={() => setShowGuide(true)}><BookOpen size={16}/> Guía</button><button className="header-text-button" onClick={exportSession}><Download size={16}/> Guardar sesión</button><button className="header-icon-button mobile-menu" onClick={() => setMobileToolsOpen(v => !v)} aria-label="Mostrar herramientas"><Menu size={20}/></button></div>
+          <div className="lab-header-center"><span className="header-dot"/> FORD–FULKERSON <span className="header-separator"/> v0.8</div>
+          <div className="lab-header-actions"><button className="header-text-button" onClick={() => setShowGuide(true)}><BookOpen size={16}/> Guía</button><button className="header-icon-button mobile-menu" onClick={() => setMobileToolsOpen(v => !v)} aria-label="Mostrar herramientas"><Menu size={20}/></button></div>
         </header>
 
         <main className="studio-container">
@@ -346,17 +294,15 @@ export default function App() {
               <div className="form-group"><label>VÉRTICES FUENTE <span className="field-help">(varios posibles)</span></label><TerminalChips graph={graph} kind="sources" change={updateGraph}/><small className="field-note"><i className="tiny-dot dot-source"/> Selección actual: {graph.sources.join(', ') || 'Ninguna'}</small></div>
               <div className="form-group"><label>VÉRTICES SUMIDERO <span className="field-help">(varios posibles)</span></label><TerminalChips graph={graph} kind="sinks" change={updateGraph}/><small className="field-note"><i className="tiny-dot dot-sink"/> Selección actual: {graph.sinks.join(', ') || 'Ninguno'}</small></div>
               <div className="panel-divider"/>
-              <div className="panel-subtitle"><span className="panel-index">02 / CONSTRUIR</span><h3>Editor de red</h3></div>
-              <div className="form-group"><label>AÑADIR NODO <span className="field-help">(7–16)</span></label><div className="input-with-action"><input aria-label="Etiqueta del nodo" placeholder="Ej. H" value={nodeDraft} onChange={e => setNodeDraft(e.target.value)} maxLength={3} onKeyDown={e => e.key === 'Enter' && addNode()}/><button title="Añadir nodo" onClick={addNode}><Plus size={18}/></button></div></div>
-              <div className="node-list" aria-label="Nodos actuales">{graph.nodes.map(n => <span key={n.id} className="node-pill">{n.id}<button title={`Eliminar nodo ${n.id}`} aria-label={`Eliminar nodo ${n.id}`} disabled={graph.nodes.length <= 7} onClick={() => deleteNode(n.id)}><X size={11}/></button></span>)}</div>
+              <div className="panel-subtitle"><span className="panel-index">{manual ? '02 / CONSTRUIR' : '02 / EXPLORAR'}</span><h3>{manual ? 'Editor de red' : 'Red automática'}</h3></div>
+              <p className="field-note">{graph.nodes.length} nodos · {manual ? 'Conecta los vértices y asigna capacidades.' : 'Selecciona las fuentes y los sumideros para comenzar.'}</p>
+              {manual && <>
               <div className="form-group spaced"><label>NUEVA CONEXIÓN</label><div className="link-selectors"><select aria-label="Nodo inicial" value={graph.nodes.some(n => n.id === sourceDraft) ? sourceDraft : graph.nodes[0]?.id} onChange={e => setSourceDraft(e.target.value)}>{graph.nodes.map(n => <option key={n.id} value={n.id}>{n.label}</option>)}</select><ArrowRight size={15}/><select aria-label="Nodo final" value={graph.nodes.some(n => n.id === targetDraft) ? targetDraft : graph.nodes.at(-1)?.id} onChange={e => setTargetDraft(e.target.value)}>{graph.nodes.map(n => <option key={n.id} value={n.id}>{n.label}</option>)}</select></div></div>
               <div className="form-group compact"><label>CAPACIDAD DE ARISTA</label><input aria-label="Capacidad de nueva arista" type="number" min="1" step="1" value={capacityDraft} onChange={e => setCapacityDraft(e.target.value)}/></div>
               <button className="studio-button studio-button-dark full" onClick={addEdge}><Plus size={16}/> Añadir conexión</button>
               <div className="panel-divider"/>
-              <div className="button-stack"><button className="studio-button studio-button-quiet" onClick={randomize}><Sparkles size={16}/> Generar red aleatoria</button><button className="studio-button studio-button-quiet" onClick={() => updateGraph(reverseResidualExample)}><GitBranch size={16}/> Caso con regreso morado</button><button className="studio-button studio-button-quiet" onClick={() => updateGraph(exampleGraph)}><RotateCcw size={16}/> Restablecer ejemplo</button></div>
-              <div className="panel-divider"/>
-              <div className="file-actions"><button onClick={() => importRef.current?.click()}><Upload size={15}/> Importar JSON</button><button onClick={exportSession}><FileJson size={15}/> Exportar JSON</button></div>
-              <input className="visually-hidden" type="file" ref={importRef} accept="application/json,.json" onChange={importSession} aria-label="Importar sesión JSON"/>
+              </>}
+              <button className="studio-button studio-button-quiet full" onClick={() => {setPlaying(false); setError(''); goTo('configuracion')}}><ArrowLeft size={16}/> Volver a configurar</button>
               <div className={`validation-message ${validation.length ? 'invalid' : 'valid'}`}>{validation.length ? <CircleHelp size={17}/> : <ShieldCheck size={17}/>}<span>{validation.length ? validation[0] : 'Red válida y lista para ejecutar.'}</span></div>
               {error && <div className="alert-error" role="alert">{error}<button onClick={() => setError('')} aria-label="Cerrar error"><X size={13}/></button></div>}
               {notice && <div className="alert-notice" role="status">{notice}</div>}
@@ -364,20 +310,20 @@ export default function App() {
             </aside>
 
             <section className="graph-column">
-              <div className="graph-header"><div className="graph-title"><span className="graph-title-icon"><Network size={19}/></span><div><h2>Topología de la red</h2><p>Editor visual interactivo</p></div></div><div className="graph-status"><span className="status-dot"/>{current ? 'Simulando' : 'Lista para editar'}</div></div>
+              <div className="graph-header"><div className="graph-title"><span className="graph-title-icon"><Network size={19}/></span><div><h2>Topología de la red</h2><p>{manual ? 'Editor visual interactivo' : 'Red generada automáticamente'}</p></div></div><div className="graph-status"><span className="status-dot"/>{current?.finished ? 'Finalizada' : current ? 'Simulando' : manual ? 'Lista para editar' : 'Lista para explorar'}</div></div>
               <div className="graph-canvas">
-                <ReactFlow nodes={nodes} edges={edges} edgeTypes={edgeTypes} onNodesChange={onNodesChange} onConnect={onConnect} onEdgeClick={(_, edge) => { if (graph.edges.some(e => e.id === edge.id)) setSelectedEdge(edge.id) }} fitView fitViewOptions={{ padding: .23 }} deleteKeyCode={null} nodesDraggable nodesConnectable elementsSelectable minZoom={.22} maxZoom={1.7}>
+                <ReactFlow nodes={nodes} edges={edges} edgeTypes={edgeTypes} onNodesChange={onNodesChange} onConnect={onConnect} onEdgeClick={(_, edge) => { if (graph.edges.some(e => e.id === edge.id)) setSelectedEdge(edge.id) }} fitView fitViewOptions={{ padding: .23 }} deleteKeyCode={null} nodesDraggable nodesConnectable={manual} elementsSelectable minZoom={.22} maxZoom={1.7}>
                   <Background color="#25364b" gap={22} size={1}/>
                   <Controls showInteractive={false}/>
                   <MiniMap pannable zoomable nodeColor={n => graph.sources.includes(n.id) ? '#41d5b6' : graph.sinks.includes(n.id) ? '#f4ae64' : '#647d99'} maskColor="rgba(4, 12, 22, .74)"/>
                 </ReactFlow>
                 <div className="canvas-overlay-top"><span><i className="legend-dot dot-source"/> Fuente</span><span><i className="legend-dot dot-sink"/> Sumidero</span><span><i className="legend-dot dot-path"/> Camino</span><span><i className="legend-dot dot-reverse"/> Residual inversa</span></div>
-                <div className="canvas-overlay-bottom"><GitBranch size={14}/> Arrastra nodos · Une los conectores para crear aristas</div>
+                <div className="canvas-overlay-bottom"><GitBranch size={14}/> {manual ? 'Arrastra nodos · Une conectores para crear aristas' : 'Arrastra nodos para explorar la red'}</div>
                 {current && <div className="canvas-phase"><span>ITERACIÓN {current.iteration}</span><strong>{phases[current.phase].name}</strong></div>}
               </div>
               <div className="edge-editor">
                 <button className="edge-editor-head" aria-expanded={showAllEdges} onClick={() => setShowAllEdges(v => !v)}><span><GitBranch size={16}/><strong>Conexiones y capacidades</strong><small>{graph.edges.length} aristas</small></span><ChevronDown size={17} className={showAllEdges ? 'rotated' : ''}/></button>
-                {showAllEdges ? <div className="edge-editor-list">{graph.edges.map(edge => <div key={edge.id} className={`edge-editor-row ${selectedEdge === edge.id ? 'chosen' : ''}`}><button className="edge-connection" title="Seleccionar arista" onClick={() => setSelectedEdge(edge.id)}>{edge.source}<ArrowRight size={13}/>{edge.target}</button><label>cap. <input aria-label={`Capacidad de ${edge.source} a ${edge.target}`} type="number" min={1} step={1} key={`${edge.id}-${edge.capacity}`} defaultValue={edge.capacity} onBlur={e => updateCapacity(edge.id, e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}/></label><button className="edge-delete" aria-label={`Eliminar conexión ${edge.source} a ${edge.target}`} title="Eliminar conexión" onClick={() => updateGraph({ ...graph, edges: graph.edges.filter(e => e.id !== edge.id) })}><Trash2 size={15}/></button></div>)}</div>
+                {showAllEdges ? <div className="edge-editor-list">{graph.edges.map(edge => <div key={edge.id} className={`edge-editor-row ${selectedEdge === edge.id ? 'chosen' : ''}`}><button className="edge-connection" title="Seleccionar arista" onClick={() => setSelectedEdge(edge.id)}>{edge.source}<ArrowRight size={13}/>{edge.target}</button><label>cap. <input readOnly={!manual} aria-label={`Capacidad de ${edge.source} a ${edge.target}`} type="number" min={1} step={1} key={`${edge.id}-${edge.capacity}`} defaultValue={edge.capacity} onBlur={e => updateCapacity(edge.id, e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}/></label>{manual && <button className="edge-delete" aria-label={`Eliminar conexión ${edge.source} a ${edge.target}`} title="Eliminar conexión" onClick={() => updateGraph({ ...graph, edges: graph.edges.filter(e => e.id !== edge.id) })}><Trash2 size={15}/></button>}</div>)}</div>
                   : <div className="edge-preview">{graph.edges.slice(0, 9).map(edge => <button type="button" key={edge.id} className={`edge-mini-chip ${selectedEdge === edge.id ? 'selected' : ''}`} onClick={() => { setSelectedEdge(edge.id); setShowAllEdges(true) }}>{edge.source}<ArrowRight size={11}/>{edge.target}<b>{edge.capacity}</b></button>)}{graph.edges.length > 9 && <button onClick={() => setShowAllEdges(true)} className="extra-edges">+ {graph.edges.length - 9} más</button>}</div>}
               </div>
               <section className="matrix-section" aria-label="Matriz de capacidades"><button className="matrix-toggle" aria-expanded={showMatrix} onClick={() => setShowMatrix(v => !v)}><span><Network size={17}/><strong>Matriz de capacidades</strong><small>{graph.nodes.length} × {graph.nodes.length} · vista tabular</small></span><ChevronDown size={18} className={showMatrix ? 'rotated' : ''}/></button>{showMatrix && <div className="matrix-scroll"><table className="capacity-table"><caption>Capacidades por vértice inicial (filas) y final (columnas). Un guion indica ausencia de arista.</caption><thead><tr><th scope="col">DESDE / HASTA</th>{graph.nodes.map(n => <th scope="col" key={n.id}>{n.label}</th>)}</tr></thead><tbody>{graph.nodes.map(from => <tr key={from.id}><th scope="row">{from.label}</th>{graph.nodes.map(to => { const found = graph.edges.find(e => e.source === from.id && e.target === to.id); return <td key={to.id} className={found ? 'matrix-active' : ''}>{found ? found.capacity : from.id === to.id ? '·' : '—'}</td> })}</tr>)}</tbody></table></div>}</section>
@@ -388,15 +334,15 @@ export default function App() {
               <div className="panel-topline result-topline"><div><span className="panel-index">03 / ANALIZAR</span><h2>Simulación</h2></div><span className={`state-indicator ${isFinished ? 'state-finished' : current ? 'state-running' : ''}`}>{isFinished ? 'FINALIZADO' : current ? 'EN CURSO' : 'EN ESPERA'}</span></div>
               <div className="flow-feature"><span>FLUJO ACUMULADO</span><div className="feature-flow"><motion.strong key={`${stepIndex}-flow`} initial={reducedMotion ? false : { y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: .23 }}>{current?.totalFlow ?? 0}</motion.strong><small>unidades</small></div><div className="feature-track"><div style={{ width: `${maxFlow ? Math.min(100, 100 * (current?.totalFlow ?? 0) / maxFlow) : 0}%` }}/></div><small>{isFinished ? `Flujo máximo confirmado: ${maxFlow}` : 'El óptimo se revela al finalizar'}</small></div>
               <div className="detail-stats"><div><span>ITERACIÓN</span><strong>{current?.iteration ?? '—'}</strong></div><div><span>CUELLO DE BOTELLA</span><strong>{current?.path?.bottleneck ?? '—'}</strong></div></div>
-              <div className="phase-card"><span>FASE ACTUAL</span><div className="phase-head"><span className="phase-number">{current ? phases[current.phase].number : '—'}</span><h3>{current ? phases[current.phase].name : 'Inicia una simulación'}</h3></div><p>{current?.explanation ?? 'Pulsa «Iniciar simulación» para ver cómo se construye el flujo máximo.'}</p>{current?.path && <div className="path-readout"><span>CAMINO AUMENTANTE</span><strong>{current.path.nodes.join(' → ')}</strong>{current.path.arcs.some(arc => arc.direction === -1) && <small><i className="legend-dot dot-reverse"/> Incluye cancelación de flujo en sentido inverso</small>}</div>}</div>
+              <div className="phase-card"><span>FASE ACTUAL</span><div className="phase-head"><span className="phase-number">{current ? phases[current.phase].number : '—'}</span><h3>{current ? phases[current.phase].name : 'Inicia una simulación'}</h3></div>{!current && <p>Inicia la simulación para recorrer sus etapas.</p>}{current?.path && <div className="path-readout"><span>CAMINO AUMENTANTE</span><strong>{current.path.nodes.join(' → ')}</strong>{current.path.arcs.some(arc => arc.direction === -1) && <small><i className="legend-dot dot-reverse"/> Incluye cancelación de flujo en sentido inverso</small>}</div>}</div>
               <div className="playback"><div className="playback-heading"><strong>Control de pasos</strong><span>{steps.length && stepIndex >= 0 ? `${stepIndex + 1} / ${steps.length}` : '0 / 0'}</span></div><div className="progress-line"><div style={{ width: `${steps.length && stepIndex >= 0 ? (stepIndex + 1) * 100 / steps.length : 0}%` }}/></div><div className="playback-buttons"><button title="Primer paso" aria-label="Primer paso" disabled={!steps.length || stepIndex <= 0} onClick={() => goStep(0)}><SkipBack size={17}/></button><button title="Paso anterior" aria-label="Paso anterior" disabled={!steps.length || stepIndex <= 0} onClick={() => goStep(stepIndex - 1)}><ArrowLeft size={17}/></button><button className="playback-main" title={playing ? 'Pausar' : 'Reproducir automáticamente'} aria-label={playing ? 'Pausar' : 'Reproducir'} disabled={!steps.length || stepIndex === steps.length - 1} onClick={() => setPlaying(v => !v)}>{playing ? <Pause size={18} fill="currentColor"/> : <Play size={18} fill="currentColor"/>}</button><button title="Siguiente paso" aria-label="Siguiente paso" disabled={!steps.length || stepIndex === steps.length - 1} onClick={() => goStep(stepIndex + 1)}><ArrowRight size={17}/></button><button title="Último paso" aria-label="Último paso" disabled={!steps.length || stepIndex === steps.length - 1} onClick={() => goStep(steps.length - 1)}><SkipForward size={17}/></button></div></div>
               <div className="history-panel"><div className="history-head"><div><Clock3 size={16}/><strong>Historial de iteraciones</strong></div><button onClick={exportCSV} disabled={!steps.length} title="Exportar el historial como CSV"><Download size={15}/></button></div><div className="history-list">{historyIndices.length ? historyIndices.map(({ step, index }) => <button className={`history-entry ${current?.iteration === step.iteration ? 'history-selected' : ''}`} key={index} onClick={() => goStep(index)}><span className="history-index">{String(step.iteration).padStart(2, '0')}</span><span className="history-description"><strong>{step.path?.nodes.join(' → ') || 'Camino'}</strong><small>+{step.path?.bottleneck} flujo · Total {step.totalFlow} {step.path?.arcs.some(a => a.direction === -1) ? '· ↶ inversa' : ''}</small></span><ChevronRight size={15}/></button>) : <p className="history-empty">Aún no hay recorridos. Al ejecutar la red aparecerá el historial completo.</p>}</div></div>
-              {isFinished && <div className="final-report"><div className="final-report-heading"><CheckCircle2 size={19}/><strong>Resultado comprobado</strong></div><div className="final-metrics"><div><span>FLUJO MÁXIMO</span><strong>{flowSummary}</strong></div><div><span>CORTE MÍNIMO</span><strong>{current.cutCapacity}</strong></div></div><div className="equality">{flowSummary} = {current.cutCapacity} <Check size={16}/></div><div className="partition"><span>CONJUNTO S</span><strong>{current.reachable.join(', ') || '∅'}</strong></div><div className="partition"><span>CONJUNTO T</span><strong>{graph.nodes.filter(n => !current.reachable.includes(n.id)).map(n => n.id).join(', ') || '∅'}</strong></div><div className="partition"><span>ARISTAS DE CORTE</span><strong>{graph.edges.filter(e => current.cutEdges.includes(e.id)).map(e => `${e.source}→${e.target}`).join(', ') || 'Ninguna'}</strong></div><p>Los regresos morados que permanezcan visibles representan aristas inversas utilizadas en el historial, no capacidades actuales.</p></div>}
+              {isFinished && <div className="final-report"><div className="final-report-heading"><CheckCircle2 size={19}/><strong>Resultado comprobado</strong></div><div className="final-metrics"><div><span>FLUJO MÁXIMO</span><strong>{flowSummary}</strong></div><div><span>CORTE MÍNIMO</span><strong>{current.cutCapacity}</strong></div></div><div className="equality">{flowSummary} = {current.cutCapacity} <Check size={16}/></div><div className="partition"><span>CONJUNTO S</span><strong>{current.reachable.join(', ') || '∅'}</strong></div><div className="partition"><span>CONJUNTO T</span><strong>{graph.nodes.filter(n => !current.reachable.includes(n.id)).map(n => n.id).join(', ') || '∅'}</strong></div><div className="partition"><span>ARISTAS DE CORTE</span><strong>{graph.edges.filter(e => current.cutEdges.includes(e.id)).map(e => `${e.source}→${e.target}`).join(', ') || 'Ninguna'}</strong></div></div>}
             </aside>
           </div>
         </main>
         <footer className="lab-footer"><span>FLOWLAB / MATEMÁTICA COMPUTACIONAL</span><span><Zap size={13}/> FORD–FULKERSON · BFS · FLUJO MÁXIMO</span><button onClick={() => goTo('inicio')}>Volver al inicio <ArrowRight size={13}/></button></footer>
-        <AnimatePresence>{showGuide && <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowGuide(false)} role="presentation"><motion.div className="guide-modal" initial={reducedMotion ? false : { y: 30, scale: .97 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, opacity: 0 }} role="dialog" aria-modal="true" aria-labelledby="guide-title" onClick={event => event.stopPropagation()}><div className="guide-header"><div><span className="panel-index">GUÍA DE USO</span><h2 id="guide-title">Cómo funciona FlowLab</h2></div><button onClick={() => setShowGuide(false)} aria-label="Cerrar guía"><X size={20}/></button></div><div className="guide-content"><p>El algoritmo Ford–Fulkerson encuentra un flujo máximo en una red. Esta implementación usa búsqueda en anchura (BFS), también conocida como variante Edmonds–Karp, y admite varias fuentes y sumideros mediante vértices ficticios internos.</p><ol><li><strong>Construye la red.</strong> Elige entre 7 y 16 nodos, sus conexiones y capacidades enteras positivas. Puedes seleccionar múltiples fuentes y sumideros.</li><li><strong>Ejecuta BFS.</strong> Las etiquetas muestran predecesor, signo (+ directo / − inverso) y capacidad residual que limita el recorrido.</li><li><strong>Encuentra un camino.</strong> Se destaca la ruta y su cuello de botella sin alterar aún el flujo.</li><li><strong>Actualiza el flujo.</strong> Las aristas directas suman y las inversas restan flujo previo. El color morado conserva también el historial de regresos.</li><li><strong>Valida el óptimo.</strong> Cuando no existen más caminos aumentantes, se determina el corte mínimo y se verifica que su capacidad coincida con el flujo máximo.</li></ol><div className="guide-note"><ShieldCheck size={18}/><span>Para recuperar un análisis, usa «Guardar sesión». También se conserva la red y el paso actual en este navegador.</span></div></div><button className="studio-button studio-button-dark" onClick={() => setShowGuide(false)}>Entendido <Check size={16}/></button></motion.div></motion.div>}</AnimatePresence>
+        <AnimatePresence>{showGuide && <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowGuide(false)} role="presentation"><motion.div className="guide-modal" initial={reducedMotion ? false : { y: 30, scale: .97 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, opacity: 0 }} role="dialog" aria-modal="true" aria-labelledby="guide-title" onClick={event => event.stopPropagation()}><div className="guide-header"><div><span className="panel-index">GUÍA DE USO</span><h2 id="guide-title">Cómo funciona FlowLab</h2></div><button onClick={() => setShowGuide(false)} aria-label="Cerrar guía"><X size={20}/></button></div><div className="guide-content"><p>El algoritmo Ford–Fulkerson encuentra un flujo máximo en una red. Esta implementación usa búsqueda en anchura (BFS), también conocida como variante Edmonds–Karp, y admite varias fuentes y sumideros mediante vértices ficticios internos.</p><ol><li><strong>Construye la red.</strong> Elige entre 7 y 16 nodos y un modo de creación. En modo manual, define conexiones y capacidades enteras positivas. Puedes seleccionar múltiples fuentes y sumideros.</li><li><strong>Ejecuta BFS.</strong> Las etiquetas muestran predecesor, signo (+ directo / − inverso) y capacidad residual que limita el recorrido.</li><li><strong>Encuentra un camino.</strong> Se destaca la ruta y su cuello de botella sin alterar aún el flujo.</li><li><strong>Actualiza el flujo.</strong> Las aristas directas suman y las inversas restan flujo previo. El color morado conserva también el historial de regresos.</li><li><strong>Valida el óptimo.</strong> Cuando no existen más caminos aumentantes, se determina el corte mínimo y se verifica que su capacidad coincida con el flujo máximo.</li></ol><div className="guide-note"><ShieldCheck size={18}/><span>Para cambiar la cantidad de nodos o el modo, usa «Volver a configurar».</span></div></div><button className="studio-button studio-button-dark" onClick={() => setShowGuide(false)}>Entendido <Check size={16}/></button></motion.div></motion.div>}</AnimatePresence>
       </motion.div>}
   </AnimatePresence>
 }
