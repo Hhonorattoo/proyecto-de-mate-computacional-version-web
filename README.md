@@ -1,4 +1,4 @@
-# FlowLab v0.9 — Laboratorio de flujo máximo
+# FlowLab v0.9.1 — Laboratorio de flujo máximo
 
 Simulador web de Ford–Fulkerson con búsqueda BFS (Edmonds–Karp), React y TypeScript.
 
@@ -31,3 +31,7 @@ Vercel compila con `npm run build` y publica `dist`. La rama main del repositori
 11 tests del motor y la generación (incluyen 30 DAG contrastados con todos sus cortes). Navegador: automático multifuente/multisumidero, nodos ficticios visibles, fases, historial, resultado, navegación de regreso, manual con ciclo bloqueado y corregido, reproducción automática y disposición móvil sin desbordamiento horizontal. Se aplica revisión Impeccable del código y revisión visual; no equivale a una certificación WCAG completa ni a prueba de gestos en dispositivo físico.
 
 Los logs de v0.7 y los documentos de esa versión se conservan como antecedentes. Esta actualización no prepara la entrega académica ni cambia el programa Python.
+
+## Ajustes v0.9.1
+
+Inicio de simulación y validación junto al encabezado de arquitectura. S* y T* se pueden arrastrar durante la construcción. Descarga visible «Descargar CSV» tanto en historial como en resultado; tooltip y nombre accesible explican el dataset.
