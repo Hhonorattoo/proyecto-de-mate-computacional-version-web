@@ -1,4 +1,4 @@
-# FlowLab v0.9.1 — Laboratorio de flujo máximo
+# Flow Fulkerson v0.9.1 — Laboratorio de flujo máximo
 
 Simulador web de Ford–Fulkerson con búsqueda BFS (Edmonds–Karp), React y TypeScript.
 
@@ -35,3 +35,7 @@ Los logs de v0.7 y los documentos de esa versión se conservan como antecedentes
 ## Ajustes v0.9.1
 
 Inicio de simulación y validación junto al encabezado de arquitectura. S* y T* se pueden arrastrar durante la construcción. Descarga visible «Descargar CSV» tanto en historial como en resultado; tooltip y nombre accesible explican el dataset.
+
+## Identidad
+
+Flow Fulkerson: marca con DynaPuff SemiBold autoalojada (licencia SIL Open Font License en public/fonts). Publicado en https://flow-fulkerson.vercel.app/. La variante azul/celeste/morada permanece como prueba local separada, sin incorporarse a producción.

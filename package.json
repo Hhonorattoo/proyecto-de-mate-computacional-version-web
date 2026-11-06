@@ -1,5 +1,5 @@
 {
-  "name": "ford-fulkerson-web",
+  "name": "flow-fulkerson",
   "private": true,
   "version": "0.9.1",
   "type": "module",
