@@ -1,0 +1,13 @@
+
+> flow-fulkerson@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.12 /home/diegohonoratto/.codex/.chatgpt-projects/g-p-6ae8db6ea00c819185e52f9963cad8a8/work/v0.7/ford-fulkerson-web
+
+
+ Test Files  3 passed (3)
+      Tests  15 passed (15)
+   Start at  01:34:49
+   Duration  2.54s (transform 1.10s, setup 0ms, import 1.75s, tests 1.09s, environment 3ms)
+

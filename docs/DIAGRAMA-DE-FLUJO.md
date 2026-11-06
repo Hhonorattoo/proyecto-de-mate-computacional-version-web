@@ -1,32 +1,36 @@
-# Diagrama de flujo de FlowLab
+# Flujo de Flow Fulkerson 1.0
 
-Corresponde al motor de `src/engine/fordFulkerson.ts`, su integración en `src/App.tsx` y el procedimiento Ford–Fulkerson con etiquetado BFS.
+El motor calcula instantáneas al iniciar; la interfaz permite reproducirlas y retroceder. Se separa ese cálculo del recorrido visible.
 
 ```mermaid
 flowchart TD
-    A[Entrar a FlowLab] --> B[Crear, importar o generar una red]
-    B --> C{¿Red válida?}
-    C -- No --> D[Mostrar errores de nodos, aristas, DAG o terminales]
-    D --> B
-    C -- Sí --> E[Inicializar flujos a cero]
-    E --> F[Agregar superfuente y supersumidero internos]
-    F --> G[Construir red residual con arcos directos e inversos]
-    G --> H[Ejecutar BFS y registrar etiquetas]
-    H --> I{¿Llega al supersumidero?}
-    I -- Sí --> J[Mostrar búsqueda y árbol de etiquetas]
-    J --> K[Reconstruir camino aumentante]
-    K --> L[Calcular cuello de botella mínimo]
-    L --> M[Mostrar camino antes de modificar flujos]
-    M --> N[Sumar flujo en arcos directos y restarlo en inversos]
-    N --> O[Guardar iteración, historial y regresos morados]
-    O --> G
-    I -- No --> P[Calcular alcanzables S y complemento T]
-    P --> Q[Marcar aristas del corte mínimo y sumar capacidades]
-    Q --> R[Comprobar flujo máximo = capacidad del corte]
-    R --> S[Mostrar resultado final e historial navegable]
-    S --> T[Exportar JSON y CSV si el usuario lo desea]
+    A[Portada] --> B[Elegir n entre 7 y 16 y modo]
+    B --> C[Crear red vacía manual o DAG aleatorio]
+    C --> D[Seleccionar fuentes y sumideros]
+    D --> E[Mostrar S* y T* si hay múltiples terminales]
+    E --> F{Red válida}
+    F -- No --> G[Informar errores y corregir]
+    G --> C
+    F -- Sí: iniciar --> H[Motor: flujos cero y arcos virtuales internos]
+    H --> I[Construir arcos residuales positivos]
+    I --> J[BFS y predecesores]
+    J --> K{Existe camino aumentante}
+    K -- Sí --> L[Guardar instantánea de búsqueda]
+    L --> M[Reconstruir camino y mínimo residual]
+    M --> N[Guardar camino antes de actualizar]
+    N --> O[Sumar directos y restar inversos]
+    O --> P[Guardar actualización e historial]
+    P --> I
+    K -- No --> Q[Alcanzables S, complemento T y corte]
+    Q --> R[Guardar estado final]
+    R --> U[Interfaz: reproducir instantáneas desde primera fase]
+    U --> V[Historial, flujo y selector de red residual]
+    V --> W{Última instantánea}
+    W -- No --> X[Avanzar, retroceder o reproducir]
+    X --> V
+    W -- Sí --> Y[Botón Ver resultado final]
+    Y --> Z[Resultado, corte, flujos y caminos]
+    Z --> AA[Volver a simulación o descargar CSV]
 ```
 
-**Estados de la interfaz por iteración:** `BUSQUEDA_BFS`, `CAMINO_ENCONTRADO`, `FLUJO_ACTUALIZADO`. El último estado es `FINAL`. Cada estado es una instantánea de flujo, residual, etiquetas y recorrido; así el usuario puede avanzar y retroceder sin alterar el resultado matemático.
-
-**Nodos ficticios:** se crean solo en el motor para fuentes/sumideros múltiples. No forman parte de la red editable; su capacidad supera la suma de las capacidades originales para que no restrinjan el máximo.
+Cada instantánea conserva flujo y capacidades. La red residual visible deriva c−f y f de esa instantánea; la tabla incluye ceros y el grafo solo capacidades positivas. El cálculo de capacidades de corte se contrasta con el flujo máximo en tests; el motor no delega su resolución a una biblioteca de flujo máximo.

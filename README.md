@@ -1,19 +1,10 @@
-# Flow Fulkerson v0.9.2 — Laboratorio de flujo máximo
+# Flow Fulkerson 1.0
 
-Simulador web de Ford–Fulkerson con búsqueda BFS (Edmonds–Karp), React y TypeScript.
+Simulador académico web de Ford–Fulkerson con BFS (Edmonds–Karp). Identidad azul/celeste/morada y Paytone One autoalojada para la marca.
 
-## Recorrido
+**Web:** https://flow-fulkerson.vercel.app/
 
-1. **Configurar:** cantidad exacta de nodos (7–16) y creación manual o automática.
-2. **Construir:** grafo editable en manual, selección de fuentes y sumideros en ambos modos, superfuente S* y supersumidero T* visibles al elegir varias terminales. Matriz de capacidades plegada por defecto, solo en esta pantalla. Los ciclos y otras redes inválidas bloquean el inicio.
-3. **Simular:** historial a la izquierda, grafo al centro y controles a la derecha en escritorio. El botón verde avanza una etapa. También se puede reproducir automáticamente y retroceder.
-4. **Resultado:** al terminar, el botón verde cambia a Ver resultado final. Muestra el flujo máximo, corte mínimo, conjuntos S/T, capacidades de corte, flujo por arista y caminos utilizados.
-
-Cada pantalla permite volver a la anterior. Volver no borra la red ni la simulación; editar la red invalida los estados previos. Crear una red nueva inicia un análisis nuevo.
-
-Los nodos ficticios no cuentan entre los n originales. Sus arcos son discontinuos y usan la misma capacidad del motor: suma de capacidades originales + 1. El flujo en esos arcos se obtiene del balance de cada terminal. Las aristas inversas y su rastro histórico continúan disponibles; se retiró la visualización del árbol/etiquetas BFS, no la búsqueda BFS del motor.
-
-## Desarrollo
+## Ejecutar
 
 Node.js 20.19+ y npm:
 
@@ -22,24 +13,28 @@ npm ci
 npm run dev
 npm run test
 npm run build
+npm run preview
 ```
 
-Vercel compila con `npm run build` y publica `dist`. La rama main del repositorio web activa el despliegue. El repositorio Python original permanece independiente.
+Vercel publica `dist` al actualizar main del repositorio web. El repositorio Python original es independiente y no se modifica.
 
-## Verificación
+## Recorrido
 
-11 tests del motor y la generación (incluyen 30 DAG contrastados con todos sus cortes). Navegador: automático multifuente/multisumidero, nodos ficticios visibles, fases, historial, resultado, navegación de regreso, manual con ciclo bloqueado y corregido, reproducción automática y disposición móvil sin desbordamiento horizontal. Se aplica revisión Impeccable del código y revisión visual; no equivale a una certificación WCAG completa ni a prueba de gestos en dispositivo físico.
+1. Configurar n entero entre 7 y 16 y modo manual o automático.
+2. Construir conexiones/capacidades en manual o explorar la red automática. Elegir múltiples fuentes/sumideros; S*/T* aparecen cuando corresponda. Matriz plegada por defecto. Las redes inválidas bloquean inicio.
+3. Simular con historial izquierdo, grafo central y controles derechos. El botón celeste avanza una fase; reproducción automática y navegación anterior disponibles. Los nodos conservan su posición entre pantallas.
+4. Consultar el resultado con flujo máximo, corte mínimo resaltado, conjuntos S/T, capacidad de corte, asignación de flujo por arista y caminos aumentantes.
 
-Los logs de v0.7 y los documentos de esa versión se conservan como antecedentes. Esta actualización no prepara la entrega académica ni cambia el programa Python.
+## Red residual completa
 
-## Ajustes v0.9.2
+En simulación y resultado, el selector Red residual muestra todos los arcos disponibles de la instantánea: directos con c−f>0 e inversos con f>0 (morados y curvos). Los ceros se omiten del dibujo y permanecen en la tabla plegable de capacidades residuales. Se incluyen los arcos de S*/T* cuando hay múltiples terminales.
 
-Inicio de simulación y validación junto al encabezado de arquitectura. S* y T* se pueden arrastrar durante la construcción. Descarga visible «Descargar CSV» tanto en historial como en resultado; tooltip y nombre accesible explican el dataset.
+La vista Flujo / capacidad conserva las aristas originales, los caminos y el rastro histórico de regresos, rotulado como histórico; la vista residual representa disponibilidad actual. No se confunden ambas.
 
-## Identidad
+## Comprobaciones y documentación
 
-Flow Fulkerson: marca con DynaPuff SemiBold autoalojada (licencia SIL Open Font License en public/fonts). Publicado en https://flow-fulkerson.vercel.app/. La paleta azul/celeste/morada está aprobada e incorporada a producción; el muestrario de fuentes permanece local para comparar opciones.
+15 tests correctos: motor, comparación de 30 DAG con enumeración de cortes, generación 7–16, red residual por fases, inversas disponibles sin historial previo, cancelación F→B y balance de terminales ficticios. Ver `docs/VERIFICACION-1.0.md` y `logs/1.0/`.
 
-## Paleta acuática
+Paytone One y su licencia SIL OFL están en `public/fonts/`. Barlow e IBM Plex Mono se mantienen para lectura y datos. La revisión Impeccable no sustituye una certificación WCAG completa.
 
-Lienzo, minimapa, controles y etiquetas con fondos azul noche; celeste para caminos y acciones, morado para regresos. Verde y naranja conservan su significado de fuente y sumidero. Tipografía DynaPuff actual hasta elegir una alternativa del muestrario.
+El informe y PPT del equipo requieren revisión independiente. Las notas de versiones antiguas se conservan como antecedentes; no representan las funciones actuales (JSON y carga de ejemplos se retiraron por decisión del usuario).

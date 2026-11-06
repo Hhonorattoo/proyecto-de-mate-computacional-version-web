@@ -1,40 +1,15 @@
-# Checklist antes de publicar o entregar
+# Comprobación de versión 1.0
 
-Las siguientes pruebas deben realizarse localmente o en Vercel y marcarse **solo cuando se comprueben en navegador**.
+Realizado en navegador integrado:
 
-## Instalación y renderizado
+- Paytone One en portada/marca y fondo azul noche.
+- Manual con 7 nodos, A→G de capacidad 5: resultado 5=5.
+- Nodo A movido en construcción conserva exactamente su posición al iniciar simulación.
+- Vista residual inicial: A→G disponible. Tras el aumento: G→A disponible con r=5; directa A→G=0. Tabla: f=5, c=5, c−f=0, inversa f=5.
+- Cambio entre vistas y recorrido hasta resultado; regreso a simulación mantiene el estado final.
+- Móvil: ancho efectivo 375 y scrollWidth 375.
+- Consola sin errores en la consulta realizada.
 
-- [ ] `npm install` sin error.
-- [ ] `npm run test` completo sin errores.
-- [ ] `npm run build` completo sin errores.
-- [ ] Portada grafito con diagrama dirigido original, título FLOWLAB y botón de entrada, sin scroll horizontal.
-- [ ] Botón Entrar al laboratorio abre el laboratorio; Volver al inicio y el enlace directo `/#/laboratorio` funcionan.
-- [ ] En ancho móvil se muestra el botón para abrir/cerrar herramientas y el grafo se puede manipular.
+Comprobaciones previas de este chat: manual/automático, nodos ficticios y sus arrastres, ciclo rechazado/corregido, CSV descargado y leído, múltiples terminales y resultados públicos. La versión 1.0 añade tests automáticos específicos de residuales; no se afirma que se haya repetido cada gesto de todas las versiones previas.
 
-## Preservación funcional
-
-- [ ] La portada y el configurador mantienen el mismo sistema visual oscuro; revisar contraste y jerarquía.
-- [ ] Abrir/cerrar la nueva matriz de capacidades y verificar sus valores contra las aristas, incluso con fuentes/sumideros múltiples.
-- [ ] Agregar y quitar nodos, respetando 7–16.
-- [ ] Agregar y eliminar aristas, cambiar capacidades positivas desde Conexiones y capacidades.
-- [ ] Conectar nodos con el mouse, moverlos sin que salten de vuelta a posiciones originales.
-- [ ] Seleccionar dos fuentes y dos sumideros con chips sin usar Ctrl/Cmd.
-- [ ] Generar DAG aleatorio e iniciar simulación.
-- [ ] Hacer un grafo inválido y comprobar que el motor no inicia sin validarlo.
-- [ ] Navegar BFS → Camino encontrado → Flujo actualizado por separado, comprobar etiquetas y cuello de botella.
-- [ ] Avanzar y retroceder, ir al último paso, volver al primero y reproducir/pausar.
-- [ ] Seleccionar una iteración del historial y observar los estados correctos.
-- [ ] En el ejemplo inicial, observar flujo 17 y corte 17.
-- [ ] Cargar caso con regreso; en iteración 6 se ve `F → B` morado antes y después de actualizar.
-- [ ] En el estado final del caso inverso, permanece la curva morada histórica.
-- [ ] En el estado final aparecen S, T, aristas de corte, capacidad del corte e igualdad flujo/corte.
-- [ ] Descargar sesión JSON y CSV, importar JSON y restaurar el paso actual.
-- [ ] Actualizar navegador: se conservan grafo y etapa actual en almacenamiento local.
-
-## Entrega
-
-- [ ] Revisar Chrome/Firefox y pantalla móvil.
-- [ ] Comprobar accesibilidad básica: foco, contraste, enlaces y texto legible.
-- [ ] Documentar resultados y figuras del informe con formato APA según la rúbrica.
-- [ ] Verificar que `npm run build` y Vercel publiquen la misma versión.
-- [ ] Sacar capturas de la portada, edición de red, BFS, regreso morado, historial y corte mínimo.
+Limitaciones: no es una certificación WCAG ni una prueba en dispositivos táctiles físicos o todos los navegadores. Guardar el ZIP y conservar acceso al repositorio permiten reproducir el build.

@@ -10,12 +10,12 @@
 | Sustentación (2 puntos) | Portada y laboratorio diseñados para demostración. | Participación puntual de todo el equipo, vestimenta formal, presentación clara y dominio del proyecto; PPT preparado por el equipo. |
 | Programa ejecutable (4 puntos) | Editor, fuentes/sumideros múltiples, ejecución completa, fases BFS separadas, regresos, historia, corte mínimo. | Probar ejecución real en el equipo y en Vercel, mostrar paso a paso y resultado final, incluir capturas. |
 
-## Casos de demostración sugeridos
+## Evidencias de versión 1.0
 
-1. **Red inicial (A→G):** cuatro aumentos, flujo máximo = corte mínimo = **17**.
-2. **Regreso inverso (F→B):** seis aumentos, flujo máximo = corte mínimo = **10**. En «Camino encontrado» y «Flujo actualizado» aparece la arista morada; en «Final» queda como historial **histórico**.
-3. **Múltiples terminales:** seleccionar A y B como fuentes, F y G como sumideros en el ejemplo. Se utilizan superfuente y supersumidero internos.
-4. **Red inválida:** generar un ciclo o una capacidad no positiva y observar el mensaje de validación sin ejecutar el algoritmo.
-5. **Persistencia:** exportar sesión, importar JSON y recuperar una etapa; exportar historial CSV.
+- Cantidad inicial exacta n=7–16, modo manual/automático, capacidades positivas y validación de DAG.
+- Fuentes/sumideros múltiples con S*/T* visibles y capacidades no limitantes.
+- Búsqueda, camino y actualización como fases navegables. Red residual completa por estado y tabla c−f/f.
+- Historial y CSV; resultado final con asignación por arista y corte mínimo resaltado.
+- Tests automáticos para casos de flujo 17 y regreso inverso 10. Son fixtures de prueba, no botones de ejemplo en la interfaz.
 
-**No confundir:** que la aplicación muestre estas evidencias no sustituye los apartados ni figuras del **informe** exigidos por la rúbrica, ni reemplaza la preparación de una exposición.
+**Pendiente académico:** revisar informe y PPT reales; observaciones del docente, figuras APA, explicación de módulos y fragmentos, diagrama, interpretación y conclusiones, además del ensayo del equipo. Esta documentación técnica no sustituye esos entregables ni acredita por sí sola una nota de la rúbrica.
